@@ -10,30 +10,21 @@ import { Subscription } from 'rxjs';
 })
 export class MediaPlayerComponent implements OnInit, OnDestroy{
   
-  mockCover: TrackModel = {
-    cover:
-    "https://lastfm.freetls.fastly.net/i/u/300x300/1a1cc9431ffacc1b7be877d61975dfc8.jpg",
-    album: "Gioly & Assia",
-    name: "BEBE (Oficial)",
-    url: "http://localhost/track.mp3",
-    _id: "1",
-  }
+  mockCover!: TrackModel;
 
   listObserver$:Array<Subscription> = [];
-
-  constructor(private multimediaService:MultimediaService) { }
+  state: string = 'paused';
+  constructor(public multimediaService:MultimediaService) { }
 
   ngOnInit(): void {
-    const observer1$:Subscription = this.multimediaService.callback.subscribe(
-      (response:TrackModel)=>{
-        console.log('Reproduciendo canción...',response);
-      }
-    )
-    this.listObserver$ = [observer1$];
+    const observer$ = this.multimediaService.playerStatus$.subscribe(
+      (state) => this.state = state
+    );
+    this.listObserver$ = [observer$];
   }
 
   ngOnDestroy(): void {
-    //throw new Error('Method not implemented.');
+    this.listObserver$.forEach( observer => observer.unsubscribe());
   }
 
 }
